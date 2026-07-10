@@ -2,6 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 python-jose[cryptography]
-passlib
 bcrypt
 pg8000
+python-multipart
