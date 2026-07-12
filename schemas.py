@@ -10,9 +10,13 @@ class UserCreate(UserBase):
 class UserUpdatePassword(BaseModel):
     new_password: str
 
+class UserUpdateForex(BaseModel):
+    forex_enabled: int
+
 class User(UserBase):
     id: int
     role: str
+    forex_enabled: int = 0
 
     class Config:
         from_attributes = True

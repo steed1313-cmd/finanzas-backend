@@ -9,6 +9,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String, default="USER")
+    forex_enabled = Column(Integer, default=0)
 
     monthly_data = relationship("MonthlyData", back_populates="owner")
 

@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import List, Dict, Any
 import json
@@ -67,6 +68,18 @@ def update_user_password(username: str, data: schemas.UserUpdatePassword, db: Se
     db_user.hashed_password = auth.get_password_hash(data.new_password)
     db.commit()
     return {"message": "Password updated successfully"}
+
+@app.put("/api/users/{username}/forex")
+def update_user_forex(username: str, data: schemas.UserUpdateForex, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    if current_user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Not enough privileges")
+    db_user = db.query(models.User).filter(models.User.username == username).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db_user.forex_enabled = data.forex_enabled
+    db.commit()
+    return {"message": "Forex permission updated successfully"}
 
 @app.delete("/api/users/{username}")
 def delete_user(username: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -154,6 +167,16 @@ def migrate_data(payload: schemas.MigrateData, db: Session = Depends(get_db), cu
 @app.on_event("startup")
 def create_default_admin():
     db = database.SessionLocal()
+    
+    # Auto-migration to add forex_enabled column if it doesn't exist
+    try:
+        db.execute(text("ALTER TABLE users ADD COLUMN forex_enabled INTEGER DEFAULT 0"))
+        db.commit()
+        print("Migrated database: added forex_enabled column")
+    except Exception as e:
+        db.rollback()
+        print("Column forex_enabled already exists or error:", str(e))
+
     admin = db.query(models.User).filter(models.User.username == "admin").first()
     if not admin:
         hashed_password = auth.get_password_hash("admin123")
