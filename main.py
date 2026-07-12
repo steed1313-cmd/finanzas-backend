@@ -166,17 +166,15 @@ def migrate_data(payload: schemas.MigrateData, db: Session = Depends(get_db), cu
 # Initialize default admin user if it doesn't exist
 @app.on_event("startup")
 def create_default_admin():
-    db = database.SessionLocal()
-    
     # Auto-migration to add forex_enabled column if it doesn't exist
     try:
-        db.execute(text("ALTER TABLE users ADD COLUMN forex_enabled INTEGER DEFAULT 0"))
-        db.commit()
+        with database.engine.begin() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN forex_enabled INTEGER DEFAULT 0"))
         print("Migrated database: added forex_enabled column")
     except Exception as e:
-        db.rollback()
         print("Column forex_enabled already exists or error:", str(e))
 
+    db = database.SessionLocal()
     admin = db.query(models.User).filter(models.User.username == "admin").first()
     if not admin:
         hashed_password = auth.get_password_hash("admin123")
