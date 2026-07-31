@@ -15,7 +15,7 @@ def get_ai_debt_plan(deudas):
         return f"⚠️ Error: La clave API no está configurada en Render. Variables detectadas en el servidor: {keys}"
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-flash-latest')
+    model = genai.GenerativeModel('gemini-flash-lite-latest')
 
     prompt = f"""
     Eres un asesor financiero patrimonial experto (nivel institucional). 
@@ -53,7 +53,7 @@ def get_ai_expense_audit(gastos_mensuales):
         return f"⚠️ Error: La clave API no está configurada en Render. Variables detectadas en el servidor: {keys}"
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-flash-latest')
+    model = genai.GenerativeModel('gemini-flash-lite-latest')
 
     prompt = f"""
     Eres un auditor financiero experto. El usuario quiere que audites sus gastos de este mes para encontrar fugas de dinero (gastos hormiga) y optimizar su presupuesto.
