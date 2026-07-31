@@ -11,8 +11,8 @@ if api_key:
     genai.configure(api_key=api_key)
 
 # Inicializar modelo
-# Recomendamos gemini-1.5-flash para velocidad y costo, o gemini-1.5-pro para razonamiento complejo
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Usamos gemini-pro por máxima compatibilidad con todas las API Keys
+model = genai.GenerativeModel('gemini-pro')
 
 def get_ai_debt_plan(deudas):
     """
