@@ -5,23 +5,18 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-# Configurar API Key
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
-
-# Inicializar modelo
-# Usamos gemini-pro por máxima compatibilidad con todas las API Keys
-model = genai.GenerativeModel('gemini-pro')
-
 def get_ai_debt_plan(deudas):
     """
     Genera un plan estratégico de pago de deudas.
-    deudas: lista de diccionarios con la info de deudas.
     """
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        return "⚠️ Error: La clave API de Gemini no está configurada. Por favor configura GEMINI_API_KEY en el archivo .env del backend."
-        
+        keys = ", ".join(os.environ.keys())
+        return f"⚠️ Error: La clave API no está configurada en Render. Variables detectadas en el servidor: {keys}"
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-pro')
+
     prompt = f"""
     Eres un asesor financiero patrimonial experto (nivel institucional). 
     El usuario te envía su lista de deudas actuales y quiere un Plan de Aceleración Inteligente.
@@ -51,11 +46,15 @@ def get_ai_debt_plan(deudas):
 def get_ai_expense_audit(gastos_mensuales):
     """
     Genera una auditoría de gastos mensuales.
-    gastos_mensuales: diccionario con todas las categorías de gasto del mes.
     """
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        return "⚠️ Error: La clave API de Gemini no está configurada. Por favor configura GEMINI_API_KEY en el archivo .env del backend."
-        
+        keys = ", ".join(os.environ.keys())
+        return f"⚠️ Error: La clave API no está configurada en Render. Variables detectadas en el servidor: {keys}"
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-pro')
+
     prompt = f"""
     Eres un auditor financiero experto. El usuario quiere que audites sus gastos de este mes para encontrar fugas de dinero (gastos hormiga) y optimizar su presupuesto.
     Responde de forma ejecutiva, usando formato Markdown (encabezados, listas, negritas) de forma clara y directa.
@@ -73,5 +72,9 @@ def get_ai_expense_audit(gastos_mensuales):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        print(f"Error AI: {e}")
-        return f"⚠️ Ocurrió un error al auditar los gastos: {str(e)}"
+        try:
+            available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+            model_list = ", ".join(available)
+            return f"⚠️ Error de modelo. Modelos en tu cuenta: {model_list}. Error original: {e}"
+        except Exception as e2:
+            return f"⚠️ Ocurrió un error al auditar los gastos: {e}"
