@@ -1,0 +1,73 @@
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
+
+# Configurar API Key
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
+
+# Inicializar modelo
+# Recomendamos gemini-1.5-flash para velocidad y costo, o gemini-1.5-pro para razonamiento complejo
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+def get_ai_debt_plan(deudas):
+    """
+    Genera un plan estratégico de pago de deudas.
+    deudas: lista de diccionarios con la info de deudas.
+    """
+    if not api_key:
+        return "⚠️ Error: La clave API de Gemini no está configurada. Por favor configura GEMINI_API_KEY en el archivo .env del backend."
+        
+    prompt = f"""
+    Eres un asesor financiero patrimonial experto (nivel institucional). 
+    El usuario te envía su lista de deudas actuales y quiere un Plan de Aceleración Inteligente.
+    Tu objetivo es analizar la situación y recomendar la mejor estrategia (Avalancha o Bola de Nieve) de manera clara, profesional, y altamente motivadora.
+    Usa formato Markdown con encabezados, negritas y listas. NO saludes como un robot, entra directo al análisis.
+    
+    Datos de las deudas del usuario:
+    {deudas}
+    
+    Por favor, responde estructurando:
+    1. Diagnóstico breve de la situación.
+    2. La deuda más tóxica a atacar inmediatamente y por qué.
+    3. Plan de acción paso a paso.
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        print(f"Error AI: {e}")
+        return f"⚠️ Ocurrió un error al consultar a la IA: {str(e)}"
+
+def get_ai_expense_audit(gastos_mensuales):
+    """
+    Genera una auditoría de gastos mensuales.
+    gastos_mensuales: diccionario con todas las categorías de gasto del mes.
+    """
+    if not api_key:
+        return "⚠️ Error: La clave API de Gemini no está configurada. Por favor configura GEMINI_API_KEY en el archivo .env del backend."
+        
+    prompt = f"""
+    Eres un auditor financiero experto. El usuario quiere que audites sus gastos de este mes para encontrar fugas de dinero (gastos hormiga) y optimizar su presupuesto.
+    Responde de forma ejecutiva, usando formato Markdown (encabezados, listas, negritas) de forma clara y directa.
+    
+    Datos financieros del usuario este mes:
+    {gastos_mensuales}
+    
+    Responde estructurando:
+    1. Análisis de liquidez general (Ingresos vs Gastos).
+    2. Detección de "Puntos de Fuga" o áreas donde está gastando de más.
+    3. 3 recomendaciones prácticas para optimizar el presupuesto del próximo mes.
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        print(f"Error AI: {e}")
+        return f"⚠️ Ocurrió un error al auditar los gastos: {str(e)}"

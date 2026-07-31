@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List, Dict, Any
 import json
 import database, models, schemas, auth
+import ai_advisor
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -141,6 +142,33 @@ def save_monthly_data(month_key: str, payload: Dict[Any, Any], db: Session = Dep
         
     db.commit()
     return {"message": "Data saved successfully"}
+
+@app.post("/api/data/prestamos")
+def update_prestamos_data(data: dict, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    json_str = json.dumps(data)
+    record = db.query(models.MonthlyData).filter(
+        models.MonthlyData.user_id == current_user.id,
+        models.MonthlyData.month_key == "prestamos"
+    ).first()
+    if record:
+        record.data = json_str
+    else:
+        record = models.MonthlyData(user_id=current_user.id, month_key="prestamos", data=json_str)
+        db.add(record)
+    db.commit()
+    return {"status": "ok"}
+
+# --- AI ADVISOR ENDPOINTS ---
+
+@app.post("/api/ai/advisor/deudas")
+def get_debt_advice(deudas: List[Dict[str, Any]], current_user: models.User = Depends(auth.get_current_user)):
+    advice = ai_advisor.get_ai_debt_plan(deudas)
+    return {"advice": advice}
+
+@app.post("/api/ai/advisor/gastos")
+def get_expense_advice(gastos: Dict[str, Any], current_user: models.User = Depends(auth.get_current_user)):
+    advice = ai_advisor.get_ai_expense_audit(gastos)
+    return {"advice": advice}
 
 @app.post("/api/migrate")
 def migrate_data(payload: schemas.MigrateData, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
