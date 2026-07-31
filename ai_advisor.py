@@ -71,6 +71,7 @@ def get_ai_debt_plan(deudas):
     1. Diagnóstico breve de la situación.
     2. La deuda más tóxica a atacar inmediatamente y por qué.
     3. Plan de acción paso a paso.
+    4. **Cronograma de Pagos (Mes a Mes)**: Genera una tabla en formato Markdown detallando cuánto dinero debe destinar a cada deuda en Mes 1, Mes 2, etc., de forma que quede MUY CLARO cómo debe actuar exactamente.
     """
     return call_gemini_with_fallback(prompt)
 
