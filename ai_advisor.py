@@ -41,8 +41,12 @@ def get_ai_debt_plan(deudas):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        print(f"Error AI: {e}")
-        return f"⚠️ Ocurrió un error al consultar a la IA: {str(e)}"
+        try:
+            available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+            model_list = ", ".join(available)
+            return f"⚠️ Error de modelo. Modelos en tu cuenta: {model_list}. Error original: {e}"
+        except Exception as e2:
+            return f"⚠️ Ocurrió un error al auditar las deudas: {e}"
 
 def get_ai_expense_audit(gastos_mensuales):
     """
