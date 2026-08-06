@@ -6,6 +6,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: Optional[str] = "USER"
+    forex_enabled: Optional[int] = 0
 
 class UserUpdatePassword(BaseModel):
     new_password: str
@@ -16,7 +18,11 @@ class UserUpdateForex(BaseModel):
 class User(UserBase):
     id: int
     role: str
-    forex_enabled: int = 0
+    forex_enabled: int
+    expiration_date: Optional[str] = None
+    last_payment_date: Optional[str] = None
+    subscription_type: Optional[str] = None
+    is_suspended: Optional[int] = 0
 
     class Config:
         from_attributes = True

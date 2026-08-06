@@ -10,6 +10,12 @@ class User(Base):
     hashed_password = Column(String)
     role = Column(String, default="USER")
     forex_enabled = Column(Integer, default=0)
+    
+    # Subscription fields
+    expiration_date = Column(String, nullable=True)  # Store ISO date string
+    last_payment_date = Column(String, nullable=True) # When they last paid
+    subscription_type = Column(String, default="GRATUITO")  # "GRATUITO", "MENSUAL", "VITALICIO"
+    is_suspended = Column(Integer, default=0) # 0 = False, 1 = True (SQLite boolean representation)
 
     monthly_data = relationship("MonthlyData", back_populates="owner")
 
